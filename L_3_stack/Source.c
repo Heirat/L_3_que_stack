@@ -11,14 +11,31 @@
 #include <windows.h>
 #include "que_stack.h"
 
-int Init (Queue **Q, Stack **S, Proc **P1, Proc **P2, Proc **P3)
+int Init (Queue **Q, Stack **S, Proc *P1, Proc *P2, Proc *P3)
 {
+	S_create (S);
+	Q_create (Q);
+	P_create (P1);
+	P_create (P2);
+	P_create (P3);
+
+	Load_tasks (Q);
+	Print_tasks (Q);
+
 	return 0;
 }
 
-int Main_cycle (Queue **Q, Stack **S, Proc **P1, Proc **P2, Proc **P3)
+int Main_cycle (Queue **Q, Stack **S, Proc *P1, Proc *P2, Proc *P3)
 {
 	printf("Главный цикл\n");
+	
+	while (((*Q)->cnt > 0) || ((*S)->cnt > 0))
+	{
+		P_check (P1);
+		P_check (P2);
+		P_check (P3);
+	}
+
 	return 0;
 }
 
@@ -26,7 +43,7 @@ int main() {
 	setlocale(LC_ALL, "RUS");
 	Stack *S = NULL;
 	Queue *Q = NULL;
-	Proc *P1 = NULL, *P2 = NULL, *P3 = NULL;
+	Proc P1, P2, P3;
 
 
 	if (Init (&Q, &S, &P1, &P2, &P3))
