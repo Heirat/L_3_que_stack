@@ -37,7 +37,7 @@ int P_create (Proc *P)
 	return 0;
 }
 
-
+// Случайное число
 int Get_rand_range_int (int min, int max)
 {
 	return rand() % (max - min + 1) + min;
@@ -83,21 +83,27 @@ int Load_tasks (Queue **Q)
 }
 
 
-// Вывод очереди
-int Print_tasks (Queue **Q)
+// Проверка на пустоту стека
+int S_is_empty (Stack *S)
 {
-	struct task *cur;
-	int i;
-	printf ("Начальная очередь задач:\n");
-	for (i = 0, cur = (*Q)->first; i < (*Q)->cnt; i++, cur = cur->next)
-	{
-		printf ("%d) №%d - %d мс\n", i, cur->num, cur->time);
-	}
-	return 0;
+	return S->first == NULL;
 }
 
-// Проверка процессора на выполнение задачи
-int P_check (Proc *P)
+//Возвращает задачу из стека и удаляет ее
+struct task *S_pop (Stack **S)
 {
+	struct task *ret;
 
+	ret = (*S)->first;
+	(*S)->first = (*S)->first->next;
+	return ret;
 }
+
+//Помещает задачу в стек
+int S_push (Stack **S, struct task *t)
+{
+	t->next = (*S)->first;
+	(*S)->first = t;
+}
+
+

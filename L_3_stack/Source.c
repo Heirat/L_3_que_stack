@@ -11,6 +11,85 @@
 #include <windows.h>
 #include "que_stack.h"
 
+
+// Вывод очереди
+int Print_tasks (Queue **Q)
+{
+	struct task *cur;
+	int i;
+	printf ("Начальная очередь задач:\n");
+	for (i = 0, cur = (*Q)->first; i < (*Q)->cnt; i++, cur = cur->next)
+	{
+		printf ("%d) №%d - %d мс\n", i, cur->num, cur->time);
+	}
+	return 0;
+}
+
+// Закончил ли процессор выполнение задачи
+void P_check (Proc **P)
+{
+	if ((*P)->on == 0)
+	{
+		(*P)->cur = clock();
+		(*P)->dif = (*P)->cur - (*P)->start;
+		if ((*P)->dif >= (*P)->time)
+			(*P)->on = 0;
+	}
+}
+
+// Включен ли процессор с номерм num
+int P_is_on (int num, Proc *P1, Proc *P2, Proc *P3)
+{
+	switch (num)
+	{
+	case 1:
+		return P1->on;
+	case 2:
+		return P2->on;
+	case 3:
+		return P3->on;
+	}
+}
+
+// Назначает задачу процессору
+void P_start_task (struct task *cur, Proc **P)
+{
+	(*P)->on = 1;
+	(*P)->time = cur->time;
+	(*P)->start = clock();	
+}
+
+// Выбирает процессор и назначает ему задачу
+void P_switch_start_task (struct task *cur, Proc **P1, Proc **P2, Proc **P3)
+{
+	switch (cur->num)
+	{
+	case 1:
+		P_start_task (cur, P1);
+	case 2:
+		P_start_task (cur, P2);
+	case 3:
+		P_start_task (cur, P3);
+	}
+}
+
+// Обработка задач в стеке
+int S_handle (Stack **S, Proc **P1, Proc **P2, Proc **P3)
+{
+	struct task *cur;
+	int n;
+	if (!S_is_empty (*S))
+	{
+		if (!P_is_on ((*S)->first->num, *P1, *P2, *P3))
+		{
+			// Достаем задачу из стека и назначаем процессору
+			cur = S_pop (S);
+			P_switch_start_task (cur, P1, P2, P3); 
+		}
+	}
+}
+
+// Инициализация структур
 int Init (Queue **Q, Stack **S, Proc *P1, Proc *P2, Proc *P3)
 {
 	S_create (S);
@@ -25,15 +104,25 @@ int Init (Queue **Q, Stack **S, Proc *P1, Proc *P2, Proc *P3)
 	return 0;
 }
 
+void P_print (Proc *P1, Proc *P2, Proc *P3)
+{
+
+}
+
 int Main_cycle (Queue **Q, Stack **S, Proc *P1, Proc *P2, Proc *P3)
 {
 	printf("Главный цикл\n");
 	
 	while (((*Q)->cnt > 0) || ((*S)->cnt > 0))
 	{
-		P_check (P1);
-		P_check (P2);
-		P_check (P3);
+		P_check (&P1);		
+		P_check (&P2);
+		P_check (&P3);
+		P_print (P1, P2, P3);
+		
+		S_handle (S, &P1, &P2, &P3);		
+		Q_handle (Q, &P1, &P2, &P3);
+
 	}
 
 	return 0;
