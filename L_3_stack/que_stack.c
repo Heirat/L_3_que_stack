@@ -37,12 +37,76 @@ int P_create (Proc *P)
 	return 0;
 }
 
+
+// Функции стека
+
+// Проверка на пустоту стека
+int S_is_empty (Stack *S)
+{
+	return S->first == NULL;
+}
+
+
+//Возвращает задачу из стека и удаляет ее
+struct task *S_pop (Stack **S)
+{
+	struct task *res;
+
+	res = (*S)->first;
+	(*S)->first = (*S)->first->next;
+	(*S)->cnt--;
+	return res;
+}
+
+//Помещает задачу в стек
+void S_push (Stack **S, struct task *t)
+{
+	t->next = (*S)->first;
+	(*S)->first = t;
+}
+
+// Функции очереди
+
+// Проверка на пустоту очереди
+int Q_is_empty (Queue *Q)
+{
+	return Q->first == NULL;
+}
+
+// Добавлнеие задачи в очередь
+void Q_push (Queue **Q, struct task *t)
+{
+	if ((*Q)->first == NULL)
+	{
+		(*Q)->first = t;
+		(*Q)->last = t;
+	}
+	else
+	{
+		(*Q)->last->next = t;
+		(*Q)->last = (*Q)->last->next;
+	}
+}
+
+//Возвращает задачу из очереди и удаляет ее
+struct task *Q_pop (Queue **Q)
+{
+	struct task *res;
+
+	res = (*Q)->first;
+	(*Q)->first = (*Q)->first->next;
+	(*Q)->cnt--;
+	return res;
+}
+
+
 // Случайное число
 int Get_rand_range_int (int min, int max)
 {
 	return rand() % (max - min + 1) + min;
 }
 
+// Создание случайной задачи
 int Gen_task (struct task *cur)
 {
 	int a;	
@@ -56,54 +120,22 @@ int Gen_task (struct task *cur)
 	return 0;
 }
 
+
 // Заполнение очереди
 int Load_tasks (Queue **Q)
 {
 	struct task *cur, *last;
 	srand (time(NULL));
 	last = malloc (sizeof(struct task));
-	int i, j;
+	int i;
 	
 	for (i = 0; i < TASKS_NUM; i++)
 	{
+		// Создание случайной задачи и добавление в очередь
 		cur = malloc (sizeof(struct task));
 		Gen_task (cur);
-		if ((*Q)->first == NULL) {
-			(*Q)->first = cur;
-			(*Q)->last = cur;
-		}
-		else
-		{
-			(*Q)->last->next = cur;
-			(*Q)->last = (*Q)->last->next;
-		}
+		Q_push (Q, cur);
 	}
 	(*Q)->cnt = TASKS_NUM;
 	return 0;
 }
-
-
-// Проверка на пустоту стека
-int S_is_empty (Stack *S)
-{
-	return S->first == NULL;
-}
-
-//Возвращает задачу из стека и удаляет ее
-struct task *S_pop (Stack **S)
-{
-	struct task *ret;
-
-	ret = (*S)->first;
-	(*S)->first = (*S)->first->next;
-	return ret;
-}
-
-//Помещает задачу в стек
-int S_push (Stack **S, struct task *t)
-{
-	t->next = (*S)->first;
-	(*S)->first = t;
-}
-
-

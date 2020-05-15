@@ -26,14 +26,14 @@ int Print_tasks (Queue **Q)
 }
 
 // Закончил ли процессор выполнение задачи
-void P_check (Proc **P)
+void P_check (Proc *P)
 {
-	if ((*P)->on == 0)
+	if (P->on == 0)
 	{
-		(*P)->cur = clock();
-		(*P)->dif = (*P)->cur - (*P)->start;
-		if ((*P)->dif >= (*P)->time)
-			(*P)->on = 0;
+		P->cur = clock();
+		P->dif = P->cur - (P)->start;
+		if (P->dif >= P->time)
+			P->on = 0;
 	}
 }
 
@@ -48,19 +48,22 @@ int P_is_on (int num, Proc *P1, Proc *P2, Proc *P3)
 		return P2->on;
 	case 3:
 		return P3->on;
+	default:
+		return 0;
 	}
+	
 }
 
 // Назначает задачу процессору
-void P_start_task (struct task *cur, Proc **P)
+void P_start_task (struct task *cur, Proc *P)
 {
-	(*P)->on = 1;
-	(*P)->time = cur->time;
-	(*P)->start = clock();	
+	P->on = 1;
+	P->time = cur->time;
+	P->start = clock();	
 }
 
 // Выбирает процессор и назначает ему задачу
-void P_switch_start_task (struct task *cur, Proc **P1, Proc **P2, Proc **P3)
+void P_switch_start_task (struct task *cur, Proc *P1, Proc *P2, Proc *P3)
 {
 	switch (cur->num)
 	{
@@ -74,17 +77,53 @@ void P_switch_start_task (struct task *cur, Proc **P1, Proc **P2, Proc **P3)
 }
 
 // Обработка задач в стеке
-int S_handle (Stack **S, Proc **P1, Proc **P2, Proc **P3)
+void S_handle (Stack **S, Proc *P1, Proc *P2, Proc *P3)
 {
-	struct task *cur;
-	int n;
+	struct task *cur;	
 	if (!S_is_empty (*S))
 	{
-		if (!P_is_on ((*S)->first->num, *P1, *P2, *P3))
+		if (!P_is_on ((*S)->first->num, P1, P2, P3))
 		{
 			// Достаем задачу из стека и назначаем процессору
+			// В стеке задачи одного типа, поэтому без цикла
 			cur = S_pop (S);
 			P_switch_start_task (cur, P1, P2, P3); 
+		}
+	}
+}
+
+// Можно ли добавить задачу номера num в стек
+int S_can_push (int num, Stack *S)
+{	
+	return S_is_empty(S) || num == S->first->num;
+}
+
+// Обработка задач в очереди
+void Q_handle (Queue **Q, Stack **S, Proc *P1, Proc *P2, Proc *P3)
+{
+	struct task *cur;
+
+	if (!Q_is_empty (*Q))
+	{
+		// Проверяем на свободу процессор для верхней задачи		
+		int Q_num = (*Q)->first->num;
+		// Задачи разного типа - поэтому распределяем в цикле,
+		// пока есть задачи, процессоры свободны и
+		// можем отправить задачи в стек
+		while (!Q_is_empty (*Q) && (!P_is_on (Q_num, P1, P2, P3) || S_can_push (Q_num, *S)))
+		{			
+			if (!P_is_on (Q_num, P1, P2, P3))
+			{
+				cur = Q_pop (Q);
+				P_switch_start_task (cur, P1, P2, P3);
+			}
+			else if (S_can_push (Q_num, *S))
+			{
+				cur = Q_pop (Q);
+				S_push (S, cur);
+			}
+			if (!Q_is_empty (*Q))
+				Q_num = (*Q)->first->num;
 		}
 	}
 }
@@ -115,13 +154,13 @@ int Main_cycle (Queue **Q, Stack **S, Proc *P1, Proc *P2, Proc *P3)
 	
 	while (((*Q)->cnt > 0) || ((*S)->cnt > 0))
 	{
-		P_check (&P1);		
-		P_check (&P2);
-		P_check (&P3);
+		P_check (P1);		
+		P_check (P2);
+		P_check (P3);
 		P_print (P1, P2, P3);
 		
-		S_handle (S, &P1, &P2, &P3);		
-		Q_handle (Q, &P1, &P2, &P3);
+		S_handle (S, P1, P2, P3);		
+		Q_handle (Q, S, P1, P2, P3);
 
 	}
 
