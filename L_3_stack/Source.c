@@ -13,16 +13,15 @@
 
 
 // Вывод очереди
-int Print_tasks (Queue **Q)
+void Print_tasks (Queue *Q)
 {
 	struct task *cur;
 	int i;
 	printf ("Начальная очередь задач:\n");
-	for (i = 0, cur = (*Q)->first; i < (*Q)->cnt; i++, cur = cur->next)
+	for (i = 0, cur = Q->first; i < Q->cnt; i++, cur = cur->next)
 	{
 		printf ("%d) №%d - %d мс\n", i+1, cur->num, cur->time);
 	}
-	return 0;
 }
 
 // Закончил ли процессор выполнение задачи
@@ -87,7 +86,9 @@ void S_handle (Stack **S, Proc *P1, Proc *P2, Proc *P3)
 			// Достаем задачу из стека и назначаем процессору
 			// В стеке задачи одного типа, поэтому без цикла
 			cur = S_pop (S);
+			//Задача №13 (500мс) из стека для процессора №1
 			P_switch_start_task (cur, P1, P2, P3); 
+			printf ("Задачу №1 (%dмс) из стека выполняет процессор №%d\n", cur->time, cur->num);
 		}
 	}
 }
@@ -105,8 +106,8 @@ void Q_handle (Queue **Q, Stack **S, Proc *P1, Proc *P2, Proc *P3)
 
 	if (!Q_is_empty (*Q))
 	{
-		// Проверяем на свободу процессор для верхней задачи		
 		int Q_num = (*Q)->first->num;
+		// Проверяем на свободу процессор для верхней задачи				
 		// Задачи разного типа - поэтому распределяем в цикле,
 		// пока есть задачи, процессоры свободны и
 		// можем отправить задачи в стек
@@ -114,17 +115,21 @@ void Q_handle (Queue **Q, Stack **S, Proc *P1, Proc *P2, Proc *P3)
 		{			
 			if (!P_is_on (Q_num, P1, P2, P3))
 			{
-				cur = Q_pop (Q);
+				cur = Q_pop (Q);				
 				P_switch_start_task (cur, P1, P2, P3);
+				printf ("Задачу №%d (%dмс) из очереди выполняет процессор №%d\n", TASKS_NUM-(*Q)->cnt, cur->time, cur->num);
 			}
 			else if (S_can_push (Q_num, *S))
 			{
 				cur = Q_pop (Q);
+				//Задачу №12 отправляю в стек с номером №2
 				S_push (S, cur);
 			}
 			if (!Q_is_empty (*Q))
 				Q_num = (*Q)->first->num;
+			//В очереди осталось 4 задач, в стеке - 3 задач
 		}
+		printf ("Количество оставшихся задач: очередь - %d, стек - %d\n", (*Q)->cnt, (*S)->cnt);
 	}
 }
 
@@ -138,7 +143,7 @@ int Init (Queue **Q, Stack **S, Proc *P1, Proc *P2, Proc *P3)
 	P_create (P3);
 
 	Load_tasks (Q);
-	Print_tasks (Q);
+	Print_tasks (*Q);
 
 	return 0;
 }

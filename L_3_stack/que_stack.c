@@ -67,6 +67,7 @@ void S_push (Stack **S, struct task *t)
 {
 	t->next = (*S)->first;
 	(*S)->first = t;
+	(*S)->cnt++;
 }
 
 // Функции очереди
