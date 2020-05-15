@@ -4,11 +4,10 @@
 #include <stdio.h>
 #include <time.h>
 #include <stdlib.h>
-#define MAX_ERR 100
 #define TASKS_NUM 15
-#define TASKS_MIN_T 100
-#define TASKS_MAX_T 1000
-#define TASKS_STEP_T 10
+#define TASKS_MIN_T 1000
+#define TASKS_MAX_T 2000
+#define TASKS_STEP_T 100
 // Задача
 struct task
 {

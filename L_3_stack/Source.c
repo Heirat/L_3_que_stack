@@ -20,7 +20,7 @@ int Print_tasks (Queue **Q)
 	printf ("Начальная очередь задач:\n");
 	for (i = 0, cur = (*Q)->first; i < (*Q)->cnt; i++, cur = cur->next)
 	{
-		printf ("%d) №%d - %d мс\n", i, cur->num, cur->time);
+		printf ("%d) №%d - %d мс\n", i+1, cur->num, cur->time);
 	}
 	return 0;
 }
@@ -28,7 +28,7 @@ int Print_tasks (Queue **Q)
 // Закончил ли процессор выполнение задачи
 void P_check (Proc *P)
 {
-	if (P->on == 0)
+	if (P->on == 1)
 	{
 		P->cur = clock();
 		P->dif = P->cur - (P)->start;
@@ -143,9 +143,36 @@ int Init (Queue **Q, Stack **S, Proc *P1, Proc *P2, Proc *P3)
 	return 0;
 }
 
+// Выводит состояние процессоров
 void P_print (Proc *P1, Proc *P2, Proc *P3)
 {
-
+	int i;
+	for (i = 0; i < 3; i++)
+	{
+		printf ("Процессор %d: ", i + 1);
+		switch (i)
+		{
+		case 0:
+			if (P1->on == 0)
+				printf ("свободен\n");			
+			else			
+				printf ("работает: %d/%d мс\n", P1->dif, P1->time);			
+			break;
+		case 1:
+			if (P2->on == 0)
+				printf ("свободен\n");
+			else			
+				printf ("работает: %d/%d мс\n", P2->dif, P2->time);
+			break;
+		case 2:
+			if (P3->on == 0)
+				printf ("свободен\n");
+			else			
+				printf ("работает: %d/%d мс\n", P3->dif, P3->time);
+			break;
+		}
+	}
+	printf ("\n");
 }
 
 int Main_cycle (Queue **Q, Stack **S, Proc *P1, Proc *P2, Proc *P3)
@@ -161,7 +188,7 @@ int Main_cycle (Queue **Q, Stack **S, Proc *P1, Proc *P2, Proc *P3)
 		
 		S_handle (S, P1, P2, P3);		
 		Q_handle (Q, S, P1, P2, P3);
-
+		Sleep (TASKS_STEP_T);
 	}
 
 	return 0;

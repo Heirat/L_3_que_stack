@@ -34,6 +34,10 @@ int Q_create (Queue **Q)
 int P_create (Proc *P)
 {
 	P->on = 0;
+	P->cur = -1;
+	P->dif = -1;
+	P->start = -1;
+	P->time = -1;
 	return 0;
 }
 
