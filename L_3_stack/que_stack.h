@@ -5,8 +5,8 @@
 #include <time.h>
 #include <stdlib.h>
 #define TASKS_NUM 15
-#define TASKS_MIN_T 1000
-#define TASKS_MAX_T 2000
+#define TASKS_MIN_T 200
+#define TASKS_MAX_T 1000
 #define TASKS_STEP_T 100
 // Задача
 struct task
