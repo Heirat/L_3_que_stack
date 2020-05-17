@@ -8,10 +8,9 @@ int S_create (Stack **S)
 	new_s->first = NULL;
 	new_s->cnt = 0;
 	
-	if (*S == NULL)
-	{
+	if (*S == NULL)	
 		*S = new_s;
-	}
+	
 	return 0;
 }
 
@@ -23,10 +22,8 @@ int Q_create (Queue **Q)
 	new_q->last = NULL;
 	new_q->cnt = 0;
 
-	if (*Q == NULL)
-	{
-		*Q = new_q;
-	}
+	if (*Q == NULL)	
+		*Q = new_q;	
 	return 0;
 }
 
@@ -42,7 +39,7 @@ int P_create (Proc *P)
 }
 
 
-// Функции стека
+/* Функции стека */
 
 // Проверка на пустоту стека
 int S_is_empty (Stack *S)
@@ -70,7 +67,7 @@ void S_push (Stack **S, struct task *t)
 	(*S)->cnt++;
 }
 
-// Функции очереди
+/* Функции очереди */
 
 // Проверка на пустоту очереди
 int Q_is_empty (Queue *Q)
@@ -104,7 +101,6 @@ struct task *Q_pop (Queue **Q)
 	return res;
 }
 
-
 // Случайное число
 int Get_rand_range_int (int min, int max)
 {
@@ -124,7 +120,6 @@ int Gen_task (struct task *cur)
 	cur->time = a;
 	return 0;
 }
-
 
 // Заполнение очереди
 int Load_tasks (Queue **Q)

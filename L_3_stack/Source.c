@@ -1,7 +1,9 @@
 /*
 Червинский Артём, ИВТ-13БО. Лабораторная работа №3. Стеки, очереди.
 
-Организовать работу системы из очереди задач Q, трех процессоров Pi, стека S.
+Организовать работу системы из очереди задач Q, трех процессоров Pi,
+стека S. Доп. правило: в одно время в стеке можгут находиться 
+задачи только одного типа (не перемешиваются).
 */
 
 #define _CRT_SECURE_NO_WARNINGS
@@ -11,6 +13,7 @@
 #include <windows.h>
 #include "que_stack.h"
 
+/* Функции вывода */
 
 // Вывод очереди
 void Print_tasks (Queue *Q)
@@ -18,11 +21,59 @@ void Print_tasks (Queue *Q)
 	struct task *cur;
 	int i;
 	printf ("\nОчередь задач:\n");
-	for (i = 0, cur = Q->first; i < Q->cnt; i++, cur = cur->next)
-	{
+	for (i = 0, cur = Q->first; i < Q->cnt; i++, cur = cur->next)	
 		printf ("%d) №%d - %d мс\n", TASKS_NUM - Q->cnt + i + 1, cur->num, cur->time);
-	}
 }
+
+// Выводит состояние процессоров
+void P_print (Proc *P1, Proc *P2, Proc *P3)
+{
+	int i;
+	printf ("\n");
+	for (i = 0; i < 3; i++)
+	{
+		printf ("Процессор %d: ", i + 1);
+		switch (i)
+		{
+		case 0:
+			if (P1->on == 0)
+				printf ("свободен\n");
+			else
+				printf ("работает: %d/%d мс\n", P1->dif, P1->time);
+			break;
+		case 1:
+			if (P2->on == 0)
+				printf ("свободен\n");
+			else
+				printf ("работает: %d/%d мс\n", P2->dif, P2->time);
+			break;
+		case 2:
+			if (P3->on == 0)
+				printf ("свободен\n");
+			else
+				printf ("работает: %d/%d мс\n", P3->dif, P3->time);
+			break;
+		}
+	}
+	printf ("\n");
+}
+
+/* Функции условий */
+
+// Условие промежуточного вывода очереди
+int need_print_q (Queue *Q)
+{
+	return (TASKS_NUM / 2 - Q->cnt < 1 && TASKS_NUM / 2 - Q->cnt > -2
+		|| TASKS_NUM / 4 - Q->cnt < 1 && TASKS_NUM / 4 - Q->cnt > -2);
+}
+
+// Можно ли добавить задачу номера num в стек
+int S_can_push (int num, Stack *S)
+{
+	return S_is_empty(S) || num == S->first->num;
+}
+
+/* Функции процессора */
 
 // Закончил ли процессор выполнение задачи
 int P_check (Proc *P)
@@ -53,8 +104,7 @@ int P_is_on (int num, Proc *P1, Proc *P2, Proc *P3)
 		return P3->on;
 	default:
 		return 0;
-	}
-	
+	}	
 }
 
 // Назначает задачу процессору
@@ -82,8 +132,10 @@ void P_switch_start_task (struct task *cur, Proc *P1, Proc *P2, Proc *P3)
 	}
 }
 
+/* Главные функции */
+
 // Обработка задач в стеке
-int S_handle (Stack **S, Proc *P1, Proc *P2, Proc *P3)
+void S_handle (Stack **S, Proc *P1, Proc *P2, Proc *P3)
 {
 	struct task *cur;	
 	if (!S_is_empty (*S))
@@ -92,20 +144,11 @@ int S_handle (Stack **S, Proc *P1, Proc *P2, Proc *P3)
 		{
 			// Достаем задачу из стека и назначаем процессору
 			// В стеке задачи одного типа, поэтому без цикла
-			cur = S_pop (S);
-			//Задача №13 (500мс) из стека для процессора №1
+			cur = S_pop (S);			
 			P_switch_start_task (cur, P1, P2, P3); 
 			printf ("Задачу №%d (%dмс) из стека выполняет процессор №%d\n", cur->num, cur->time, cur->num);
-			return 1;
 		}
 	}
-	return 0;
-}
-
-// Можно ли добавить задачу номера num в стек
-int S_can_push (int num, Stack *S)
-{	
-	return S_is_empty(S) || num == S->first->num;
 }
 
 // Обработка задач в очереди
@@ -145,7 +188,7 @@ void Q_handle (Queue **Q, Stack **S, Proc *P1, Proc *P2, Proc *P3)
 }
 
 // Инициализация структур
-int Init (Queue **Q, Stack **S, Proc *P1, Proc *P2, Proc *P3)
+void Init (Queue **Q, Stack **S, Proc *P1, Proc *P2, Proc *P3)
 {
 	S_create (S);
 	Q_create (Q);
@@ -154,51 +197,11 @@ int Init (Queue **Q, Stack **S, Proc *P1, Proc *P2, Proc *P3)
 	P_create (P3);
 
 	Load_tasks (Q);
-	Print_tasks (*Q);
-
-	return 0;
+	Print_tasks (*Q);	
 }
 
-// Выводит состояние процессоров
-void P_print (Proc *P1, Proc *P2, Proc *P3)
-{
-	int i;
-	printf ("\n");
-	for (i = 0; i < 3; i++)
-	{
-		printf ("Процессор %d: ", i + 1);
-		switch (i)
-		{
-		case 0:
-			if (P1->on == 0)
-				printf ("свободен\n");			
-			else			
-				printf ("работает: %d/%d мс\n", P1->dif, P1->time);			
-			break;
-		case 1:
-			if (P2->on == 0)
-				printf ("свободен\n");
-			else			
-				printf ("работает: %d/%d мс\n", P2->dif, P2->time);
-			break;
-		case 2:
-			if (P3->on == 0)
-				printf ("свободен\n");
-			else			
-				printf ("работает: %d/%d мс\n", P3->dif, P3->time);
-			break;
-		}
-	}
-	printf ("\n");
-}
-
-int need_print_q (Queue *Q)
-{
-	return (TASKS_NUM / 2 - Q->cnt < 1 && TASKS_NUM / 2 - Q->cnt > -2 
-		|| TASKS_NUM / 4 - Q->cnt < 1 && TASKS_NUM / 4 - Q->cnt > -2);
-}
-
-int Main_cycle (Queue **Q, Stack **S, Proc *P1, Proc *P2, Proc *P3)
+// Главный цикл
+void Main_cycle (Queue **Q, Stack **S, Proc *P1, Proc *P2, Proc *P3)
 {
 	printf("\nГлавный цикл\n");
 	while (((*Q)->cnt > 0) || ((*S)->cnt > 0))
@@ -215,9 +218,7 @@ int Main_cycle (Queue **Q, Stack **S, Proc *P1, Proc *P2, Proc *P3)
 		if (need_print_q (*Q))
 			Print_tasks (*Q);
 		Sleep (TASKS_STEP_T);
-	}
-
-	return 0;
+	}	
 }
 
 int main() {
@@ -226,19 +227,9 @@ int main() {
 	Queue *Q = NULL;
 	Proc P1, P2, P3;
 
+	Init (&Q, &S, &P1, &P2, &P3);
 
-	if (Init (&Q, &S, &P1, &P2, &P3))
-	{
-		printf("Ошибка при инициализации структур");
-		system("pause");
-		return 0;
-	}
-
-	if (Main_cycle (&Q, &S, &P1, &P2, &P3))
-	{		
-		system("pause");
-		return 0;
-	}
+	Main_cycle (&Q, &S, &P1, &P2, &P3);
 
 	system("pause");
 	return 0;
