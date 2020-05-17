@@ -81,8 +81,20 @@ int while_work (Queue *Q, Stack *S, Proc *P1, Proc *P2, Proc *P3)
 
 /* Функции процессора */
 
-// Закончил ли процессор выполнение задачи
-int P_check (Proc *P)
+// Создание процессора
+int P_create (Proc *P)
+{
+	P->on = 0;
+	P->cur = -1;
+	P->dif = -1;
+	P->start = -1;
+	P->time = -1;
+	P->t = NULL;
+	return 0;
+}
+
+// Проверить и закончить задачу
+void P_check (Proc *P)
 {
 	if (P->on == 1)
 	{
@@ -91,10 +103,9 @@ int P_check (Proc *P)
 		if (P->dif >= P->time)
 		{
 			P->on = 0;
-			return 1;
+			free (P->t);
 		}
 	}
-	return 0;
 }
 
 // Включен ли процессор с номерм num
@@ -118,6 +129,7 @@ void P_start_task (struct task *cur, Proc *P)
 {
 	P->on = 1;
 	P->time = cur->time;
+	P->t = cur;
 	P->start = clock();	
 }
 
@@ -168,8 +180,8 @@ void Q_handle (Queue **Q, Stack **S, Proc *P1, Proc *P2, Proc *P3)
 		// Задачи разного типа - поэтому распределяем в цикле,
 		// пока есть задачи, процессоры свободны и
 		// можем отправить задачи в стек
-		while (!Q_is_empty (*Q) && (!P_is_on (Q_num, P1, P2, P3) 
-			|| can_push_s (Q_num, *S)))
+		while (!Q_is_empty (*Q) && (!P_is_on (Q_num, P1, P2, P3) ||
+			can_push_s (Q_num, *S)))
 		{			
 			if (!P_is_on (Q_num, P1, P2, P3))
 			{
@@ -234,7 +246,6 @@ int main() {
 	Proc P1, P2, P3;
 
 	Init (&Q, &S, &P1, &P2, &P3);
-
 	Main_cycle (&Q, &S, &P1, &P2, &P3);
 
 	system("pause");
