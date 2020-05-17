@@ -47,7 +47,6 @@ int S_is_empty (Stack *S)
 	return S->first == NULL;
 }
 
-
 //¬озвращает задачу из стека и удал€ет ее
 struct task *S_pop (Stack **S)
 {

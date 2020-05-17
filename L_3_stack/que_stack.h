@@ -34,7 +34,44 @@ typedef struct proc
 	int start, cur, dif;
 } Proc;
 
+// Создание стека
+int S_create (Stack **S);
 
+// Создание очереди
+int Q_create (Queue **Q);
 
+// Создание процессора
+int P_create (Proc *P);
+
+/* Функции стека */
+
+// Проверка на пустоту стека
+int S_is_empty (Stack *S);
+
+//Возвращает задачу из стека и удаляет ее
+struct task *S_pop (Stack **S);
+
+//Помещает задачу в стек
+void S_push (Stack **S, struct task *t);
+
+/* Функции очереди */
+
+// Проверка на пустоту очереди
+int Q_is_empty (Queue *Q);
+
+// Добавлнеие задачи в очередь
+void Q_push (Queue **Q, struct task *t);
+
+//Возвращает задачу из очереди и удаляет ее
+struct task *Q_pop (Queue **Q);
+
+// Случайное число
+int Get_rand_range_int (int min, int max);
+
+// Создание случайной задачи
+int Gen_task (struct task *cur);
+
+// Заполнение очереди
+int Load_tasks (Queue **Q);
 #endif // !QUE_STACK_H
 
