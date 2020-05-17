@@ -68,9 +68,15 @@ int need_print_q (Queue *Q)
 }
 
 // Можно ли добавить задачу номера num в стек
-int S_can_push (int num, Stack *S)
+int can_push_s (int num, Stack *S)
 {
 	return S_is_empty(S) || num == S->first->num;
+}
+
+// Условие продолжения главного цикла
+int while_work (Queue *Q, Stack *S, Proc *P1, Proc *P2, Proc *P3)
+{
+	return ((Q->cnt > 0) || (S->cnt > 0) || P1->on || P2->on || P3->on);
 }
 
 /* Функции процессора */
@@ -163,7 +169,7 @@ void Q_handle (Queue **Q, Stack **S, Proc *P1, Proc *P2, Proc *P3)
 		// пока есть задачи, процессоры свободны и
 		// можем отправить задачи в стек
 		while (!Q_is_empty (*Q) && (!P_is_on (Q_num, P1, P2, P3) 
-			|| S_can_push (Q_num, *S)))
+			|| can_push_s (Q_num, *S)))
 		{			
 			if (!P_is_on (Q_num, P1, P2, P3))
 			{
@@ -172,7 +178,7 @@ void Q_handle (Queue **Q, Stack **S, Proc *P1, Proc *P2, Proc *P3)
 				printf ("Задачу %d) №%d (%dмс) из очереди выполняет процессор №%d\n",
 					TASKS_NUM - (*Q)->cnt, cur->num, cur->time, cur->num);
 			}
-			else if (S_can_push (Q_num, *S))
+			else if (can_push_s (Q_num, *S))
 			{
 				cur = Q_pop (Q);
 				S_push (S, cur);
@@ -204,7 +210,7 @@ void Init (Queue **Q, Stack **S, Proc *P1, Proc *P2, Proc *P3)
 void Main_cycle (Queue **Q, Stack **S, Proc *P1, Proc *P2, Proc *P3)
 {
 	printf("\nГлавный цикл\n");
-	while (((*Q)->cnt > 0) || ((*S)->cnt > 0))
+	while (while_work (*Q, *S, P1, P2, P3))
 	{
 		P_check (P1);
 		P_check (P2);
