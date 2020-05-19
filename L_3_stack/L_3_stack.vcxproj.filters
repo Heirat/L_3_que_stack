@@ -15,10 +15,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Source.c">
+    <ClCompile Include="que_stack.c">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="que_stack.c">
+    <ClCompile Include="main.c">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>

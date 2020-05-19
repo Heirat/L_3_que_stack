@@ -4,7 +4,10 @@
 // Создание стека
 int S_create (Stack **S)
 {
+
 	Stack *new_s = malloc (sizeof (Stack));
+	if (new_s == NULL)
+		return 1;
 	new_s->first = NULL;
 	new_s->cnt = 0;
 	
@@ -17,7 +20,10 @@ int S_create (Stack **S)
 // Создание очереди
 int Q_create (Queue **Q)
 {
+	// Проверить
 	Queue *new_q = malloc (sizeof (Queue));
+	if (new_q == NULL)
+		return 1;
 	new_q->first = NULL;
 	new_q->last = NULL;
 	new_q->cnt = 0;
@@ -101,9 +107,8 @@ int Gen_task (struct task *cur)
 	int a;	
 	cur->next = NULL;
 	cur->num = Get_rand_range_int (1, 3);
-	do	
-		a = Get_rand_range_int (TASKS_MIN_T, TASKS_MAX_T);
-	while (a % TASKS_STEP_T != 0);
+	
+	a = Get_rand_range_int (TASKS_MIN_T, TASKS_MAX_T) * TASKS_STEP_T;	
 
 	cur->time = a;
 	return 0;
@@ -115,12 +120,16 @@ int Load_tasks (Queue **Q)
 	struct task *cur, *last;
 	srand (time(NULL));
 	last = malloc (sizeof(struct task));
+	if (last == NULL)
+		return 1;
 	int i;
 	
 	for (i = 0; i < TASKS_NUM; i++)
 	{
 		// Создание случайной задачи и добавление в очередь
 		cur = malloc (sizeof(struct task));
+		if (cur == NULL)
+			return 1;
 		Gen_task (cur);
 		Q_push (Q, cur);
 	}
