@@ -4,11 +4,12 @@
 #include <stdio.h>
 #include <time.h>
 #include <stdlib.h>
+
 #define TASKS_NUM 15
 #define TASKS_MIN_T 2
 #define TASKS_MAX_T 10
 #define TASKS_STEP_T 100
-// Задача
+
 struct task
 {
 	int num, time;
@@ -27,22 +28,11 @@ typedef struct queue
 	int cnt;
 } Queue;
 
-// Процессор
-typedef struct proc
-{
-	int on, time; // Текущая задача: наличие и требуемое время
-	int start, cur, dif;
-	struct task *t; // Указатель на задачу
-} Proc;
-
 // Создание стека
 int S_create (Stack **S);
 
 // Создание очереди
 int Q_create (Queue **Q);
-
-// Создание процессора
-int P_create (Proc *P);
 
 /* Функции стека */
 
@@ -56,6 +46,9 @@ struct task *S_pop (Stack **S);
 void S_push (Stack **S, struct task *t);
 
 /* Функции очереди */
+
+// Вывод очереди
+void Print_tasks (Queue *Q);
 
 // Проверка на пустоту очереди
 int Q_is_empty (Queue *Q);

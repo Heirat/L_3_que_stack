@@ -12,142 +12,12 @@
 #include <time.h>
 #include <windows.h>
 #include "que_stack.h"
-
-/* Функции вывода */
-
-// Вывод очереди
-void Print_tasks (Queue *Q)
-{
-	struct task *cur;
-	int i;
-	printf ("\nОчередь задач:\n");
-	for (i = 0, cur = Q->first; i < Q->cnt; i++, cur = cur->next)	
-		printf ("%d) №%d - %d мс\n", TASKS_NUM - Q->cnt + i + 1, cur->num, cur->time);
-}
-
-// Выводит состояние процессоров
-void P_print (Proc *P1, Proc *P2, Proc *P3)
-{
-	int i;
-	printf ("\n");
-	for (i = 0; i < 3; i++)
-	{
-		printf ("Процессор %d: ", i + 1);
-		switch (i)
-		{
-		case 0:
-			if (P1->on == 0)
-				printf ("свободен\n");
-			else
-				printf ("работает: %d/%d мс\n", P1->dif, P1->time);
-			break;
-		case 1:
-			if (P2->on == 0)
-				printf ("свободен\n");
-			else
-				printf ("работает: %d/%d мс\n", P2->dif, P2->time);
-			break;
-		case 2:
-			if (P3->on == 0)
-				printf ("свободен\n");
-			else
-				printf ("работает: %d/%d мс\n", P3->dif, P3->time);
-			break;
-		}
-	}
-	printf ("\n");
-}
-
-/* Функции условий */
-
-// Условие промежуточного вывода очереди
-int need_print_q (Queue *Q)
-{
-	return (TASKS_NUM / 2 - Q->cnt < 1 && TASKS_NUM / 2 - Q->cnt > -2
-		|| TASKS_NUM / 4 - Q->cnt < 1 && TASKS_NUM / 4 - Q->cnt > -2);
-}
+#include "proc.h"
 
 // Можно ли добавить задачу номера num в стек
 int can_push_s (int num, Stack *S)
 {
 	return S_is_empty(S) || num == S->first->num;
-}
-
-// Условие продолжения главного цикла
-int while_work (Queue *Q, Stack *S, Proc *P1, Proc *P2, Proc *P3)
-{
-	return ((Q->cnt > 0) || (S->cnt > 0) || P1->on || P2->on || P3->on);
-}
-
-/* Функции процессора */
-
-// Создание процессора
-int P_create (Proc *P)
-{
-	P->on = 0;
-	P->cur = -1;
-	P->dif = -1;
-	P->start = -1;
-	P->time = -1;
-	P->t = NULL;
-	return 0;
-}
-
-// Проверить и закончить задачу
-void P_check (Proc *P)
-{
-	if (P->on == 1)
-	{
-		P->cur = clock();
-		P->dif = P->cur - (P)->start;
-		if (P->dif >= P->time)
-		{
-			P->on = 0;
-			free (P->t);
-		}
-	}
-}
-
-// Включен ли процессор с номерм num
-int P_is_on (int num, Proc *P1, Proc *P2, Proc *P3)
-{
-	switch (num)
-	{
-	case 1:
-		return P1->on;
-	case 2:
-		return P2->on;
-	case 3:
-		return P3->on;
-	default:
-		return 0;
-	}	
-}
-
-// Назначает задачу процессору
-void P_start_task (struct task *cur, Proc *P)
-{
-	P->on = 1;
-	P->time = cur->time;
-	P->t = cur;
-	P->start = clock();	
-}
-
-// Выбирает процессор и назначает ему задачу
-void P_switch_start_task (struct task *cur, Proc *P1, Proc *P2, Proc *P3)
-{
-	switch (cur->num)
-	{
-	case 1:
-		P_start_task (cur, P1);
-		break;
-	case 2:
-		P_start_task (cur, P2);
-		break;
-	case 3:
-		P_start_task (cur, P3);
-		break;
-	}
 }
 
 /* Главные функции */
@@ -176,10 +46,6 @@ void Q_handle (Queue **Q, Stack **S, Proc *P1, Proc *P2, Proc *P3)
 	if (!Q_is_empty (*Q))
 	{
 		int Q_num = (*Q)->first->num;
-		// Проверяем на свободу процессор для верхней задачи				
-		// Задачи разного типа - поэтому распределяем в цикле,
-		// пока есть задачи, процессоры свободны и
-		// можем отправить задачи в стек
 		while (!Q_is_empty (*Q) && (!P_is_on (Q_num, P1, P2, P3) ||
 			can_push_s (Q_num, *S)))
 		{			
@@ -222,7 +88,7 @@ void Init (Queue **Q, Stack **S, Proc *P1, Proc *P2, Proc *P3)
 void Main_cycle (Queue **Q, Stack **S, Proc *P1, Proc *P2, Proc *P3)
 {
 	printf("\nГлавный цикл\n");
-	while (while_work (*Q, *S, P1, P2, P3))
+	while (((*Q)->cnt > 0) || ((*S)->cnt > 0) || P1->on || P2->on || P3->on)
 	{
 		P_check (P1);
 		P_check (P2);
@@ -233,7 +99,8 @@ void Main_cycle (Queue **Q, Stack **S, Proc *P1, Proc *P2, Proc *P3)
 		S_handle (S, P1, P2, P3);
 		Q_handle (Q, S, P1, P2, P3);
 
-		if (need_print_q (*Q))
+		if (TASKS_NUM / 2 - (*Q)->cnt < 1 && TASKS_NUM / 2 - (*Q)->cnt > -2
+			|| TASKS_NUM / 4 - (*Q)->cnt < 1 && TASKS_NUM / 4 - (*Q)->cnt > -2)
 			Print_tasks (*Q);
 		Sleep (TASKS_STEP_T);
 	}	

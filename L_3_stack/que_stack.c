@@ -63,6 +63,16 @@ void S_push (Stack **S, struct task *t)
 
 /* Функции очереди */
 
+// Вывод очереди
+void Print_tasks (Queue *Q)
+{
+	struct task *cur;
+	int i;
+	printf ("\nОчередь задач:\n");
+	for (i = 0, cur = Q->first; i < Q->cnt; i++, cur = cur->next)
+		printf ("%d) №%d - %d мс\n", TASKS_NUM - Q->cnt + i + 1, cur->num, cur->time);
+}
+
 // Проверка на пустоту очереди
 int Q_is_empty (Queue *Q)
 {
